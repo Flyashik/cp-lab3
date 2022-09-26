@@ -1,34 +1,54 @@
 class Cache{
     #cache = [];
-
+    #statistics = [];
     constructor(){
     }
 
+    maybeClear(element){
+      if(element.count == 0){
+        this.#cache.pop(element);
+      }
+    }
+
     set(key, value=null, count=1){
-        this.#cache.push([key, value, count]);
+      let hasKey = this.#cache.find(element => element.key == key);
+      if(hasKey == undefined)
+      {
+        this.#cache.push({key: key, value: value, count: count});
+        this.#statistics.push('Set ${key} : ${value}. HitsAmount: ${count}');
+      }
+      else {
+        if(hasKey.count != 0){
+          hasKey.value = value;
+          hasKey.count -= 1;
+        }
+      }
     }
 
     get(key){
-        for (var i = 0; i < this.#cache.length; i++) {
-          if(this.#cache[i][0] == key){
-              if(this.#cache[i][2] != 0){
-                this.#cache[i][2] -= 1;
-                return this.#cache[i][1];
-              }
-              else {
-                return null;
-              }
-          }
+      let hasKey = this.#cache.find(element => element.key == key);
+      if(hasKey == undefined){
+        return 'Element with this key not found.';
+      }
+      else {
+        if(hasKey.count != 0){
+          hasKey.count -= 1;
+          this.#statistics.push('Get ${key} : ${value}. HitsAmount: ${count}');
+          return hasKey.value;
         }
-        return "key undefined";
-    }
-    getCount(key){
-      for (var i = 0; i < this.#cache.length; i++) {
-        if(this.#cache[i][0] == key){
-            return this.#cache[i][2];
+        else{
+          return null;
         }
       }
-      return "key undefined";
+    }
+    getCount(key){
+      let hasKey = this.#cache.find(element => element.key == key);
+      if(hasKey == undefined){
+        return 'Element with this key not found.';
+      }
+      else {
+        return hasKey.count;
+      }
     }
 }
 export {Cache}
